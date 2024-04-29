@@ -12,11 +12,6 @@ class ProvinceSpider(scrapy.Spider):
         urls = [
             "https://www.stats.gov.cn/sj/tjbz/tjyqhdmhcxhfdm/2023/index.html"
         ]
-        
-        headers = {
-                'User-Agent': 'Your User Agent',
-                # Other headers as needed
-            }
         for url in urls:
             yield scrapy.Request(url=url, callback=self.parse, dont_filter=True)
 
@@ -48,9 +43,11 @@ class ProvinceSpider(scrapy.Spider):
             url = url1 + node.xpath('./td[2]/a/@href').extract()[0]
             yield item
             yield Request(url, callback=self.parse3, dont_filter=True)
-
+            
+    # 只统计到了区级
     def parse3(self, response):
         # 区级 towntr 
+        # 存在直辖镇故此处调整towntr; https://www.stats.gov.cn/sj/tjbz/tjyqhdmhcxhfdm/2023/44/4420.html
         r=response.xpath('//tr[@class="countytr"]')+response.xpath('//tr[@class="towntr"]')
         for node in r:
             item = Class3_Item()
@@ -65,6 +62,7 @@ class ProvinceSpider(scrapy.Spider):
                 url = url1 + '/' + node.xpath('./td[2]/a/@href').extract()[0]
                 yield item
                 # yield Request(url, callback=self.parse4, dont_filter=True)
+                # 只统计到了区级;
         
     def parse4(self, response):
         # 街道
